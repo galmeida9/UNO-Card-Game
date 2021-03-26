@@ -7,12 +7,14 @@ import DeckContext from './DeckContext';
 export default function GameBoard(props) {
     const [deck, setDeck] = React.useState([]);
     const [currCard, setCurrCard] = React.useState(null);
+    const [addCard, setAddCard] = React.useState(false);
+    const [players, setPlayers] = React.useState([0, 1]);
+    const [currPlayer, setCurrPlayer] = React.useState(0);
 
     const classes = useStyles();
 
     useEffect(() => {
-        setDeck(getDeck());
-        getInitialCard();
+        initializeCards();
     }, [])
 
     const removeCard = (index) => {
@@ -20,24 +22,40 @@ export default function GameBoard(props) {
         setDeck(deck);
     }
 
-    const getInitialCard = () => {
-        let index = Math.floor(Math.random() * deck.length);
-        setCurrCard(deck[index]);
-        removeCard(index);
+    const initializeCards = () => {
+        const cards = getDeck();
+        let index = Math.floor(Math.random() * cards.length);
+        setCurrCard(cards[index]);
+        setDeck(cards);
+    }
+
+    const changeCard = (card) => {
+        setCurrCard(card);
+    }
+
+    const nextPlayer = () => {
+        setCurrPlayer(prev => (prev + 1) % 2);
     }
 
     if (deck.length > 0 && currCard != null) {
         return (
             <DeckContext.Provider
-                value = {{
+                value={{
                     deck: deck,
-                    remove: removeCard
+                    card: currCard,
+                    addCard: addCard,
+                    player: currPlayer,
+                    remove: removeCard,
+                    changeCard: changeCard,
+                    setAddCard: setAddCard,
+                    next: nextPlayer
                 }
-            }>
+                }>
                 <div className={classes.root}>
                     <CardComponent Card={currCard} className={classes.centerCard} />
-                    <BackCard className={classes.deck} />
-                    <Player />
+                    <BackCard className={classes.deck} onClick={() => { setAddCard(true) }} />
+                    <Player Show Card={currCard} Id={0} />
+                    <Player Position="top" Card={currCard} Id={1} />
                 </div>
             </DeckContext.Provider>
         );

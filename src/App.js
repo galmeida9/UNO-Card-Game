@@ -1,5 +1,4 @@
 import GameBoard from './components/GameBoard';
-import { getDeck } from './components/Cards';
 
 function App() {
     return (

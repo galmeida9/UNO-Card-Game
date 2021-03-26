@@ -33,24 +33,26 @@ export function getDeck() {
     return deck;
 }
 
-export function CardComponent(props) {
+export function CardComponent({Card, className, onClick}) {
     return (
         <img
-            src={props.Card.img}
-            alt={props.Card.color + " " + props.Card.number}
+            src={Card.img}
+            alt={Card.color + " " + Card.number}
             style={{ width: '80pt', borderRadius: '16px' }}
-            className={props.className}
+            className={className}
+            onClick={onClick}
         />
     );
 }
 
-export function BackCard(props) {
+export function BackCard({className, onClick}) {
     return (
         <img
             src={`${process.env.PUBLIC_URL}/assets/uno_back.png`}
             alt="Back Card"
-            style={{ width: '78pt' }}
-            className={props.className}
+            style={{ width: '78pt', padding: '1pt' }}
+            className={className}
+            onClick={onClick}
         />
     );
 }
