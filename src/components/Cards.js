@@ -33,26 +33,28 @@ export function getDeck() {
     return deck;
 }
 
-export function CardComponent({Card, className, onClick}) {
+export const CardComponent = React.forwardRef((props, ref) => {
     return (
         <img
-            src={Card.img}
-            alt={Card.color + " " + Card.number}
+            src={props.Card.img}
+            alt={props.Card.color + " " + props.Card.number}
             style={{ width: '80pt', borderRadius: '16px' }}
-            className={className}
-            onClick={onClick}
+            className={props.className}
+            onClick={props.onClick}
+            ref={ref}
         />
     );
-}
+})
 
-export function BackCard({className, onClick}) {
+export const BackCard = React.forwardRef((props, ref) => {
     return (
         <img
             src={`${process.env.PUBLIC_URL}/assets/uno_back.png`}
             alt="Back Card"
             style={{ width: '78pt', padding: '1pt' }}
-            className={className}
-            onClick={onClick}
+            className={props.className}
+            onClick={props.onClick}
+            ref={ref}
         />
     );
-}
+})

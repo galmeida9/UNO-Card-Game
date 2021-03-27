@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react';
 import { BackCard, getDeck, CardComponent } from './Cards';
 import Player from './Player';
+import Bot from './Bot';
 import { makeStyles } from '@material-ui/core/styles';
 import DeckContext from './DeckContext';
+import Button from '@material-ui/core/Button';
+import SkipNextIcon from '@material-ui/icons/SkipNext';
+import ReplayIcon from '@material-ui/icons/Replay';
 
 export default function GameBoard(props) {
     const [deck, setDeck] = React.useState([]);
@@ -54,8 +58,25 @@ export default function GameBoard(props) {
                 <div className={classes.root}>
                     <CardComponent Card={currCard} className={classes.centerCard} />
                     <BackCard className={classes.deck} onClick={() => { setAddCard(true) }} />
-                    <Player Show Card={currCard} Id={0} />
-                    <Player Position="top" Card={currCard} Id={1} />
+                    <Player Id={0} />
+                    <Bot Position="top" Id={1} />
+                    <Button
+                        variant="contained"
+                        color="default"
+                        className={classes.finishTurn}
+                        endIcon={<SkipNextIcon />}
+                        onClick={nextPlayer}
+                    >
+                        Finish Turn
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="default"
+                        className={classes.undo}
+                        endIcon={<ReplayIcon />}
+                    >
+                        Undo
+                    </Button>
                 </div>
             </DeckContext.Provider>
         );
@@ -91,5 +112,15 @@ const useStyles = makeStyles((theme) => ({
         top: '50%',
         transform: 'translate(-50%, -50%)',
         userSelect: 'none'
+    },
+    finishTurn: {
+        position: 'absolute',
+        bottom: '60pt',
+        right: '20pt'
+    },
+    undo: {
+        position: 'absolute',
+        bottom: '20pt',
+        right: '20pt'
     }
 }));
