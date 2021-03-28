@@ -14,6 +14,8 @@ export default function GameBoard(props) {
     const [addCard, setAddCard] = React.useState(false);
     const [players, setPlayers] = React.useState([0, 1]);
     const [currPlayer, setCurrPlayer] = React.useState(0);
+    const [specials, setSpecials] = React.useState([]);
+    const [specialColor, setSpecialColor] = React.useState(null);
 
     const classes = useStyles();
 
@@ -49,10 +51,14 @@ export default function GameBoard(props) {
                     card: currCard,
                     addCard: addCard,
                     player: currPlayer,
+                    specials: specials,
+                    specialColor: specialColor,
                     remove: removeCard,
                     changeCard: changeCard,
                     setAddCard: setAddCard,
-                    next: nextPlayer
+                    next: nextPlayer,
+                    setSpecials: setSpecials,
+                    setSpecialColor: setSpecialColor
                 }
                 }>
                 <div className={classes.root}>

@@ -3,6 +3,8 @@ import DeckContext from './DeckContext';
 import Grid from '@material-ui/core/Grid';
 import { CardComponent } from './Cards';
 import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
+import Paper from '@material-ui/core/Paper';
 
 export default function Player(props) {
     // cards in hand
@@ -15,6 +17,8 @@ export default function Player(props) {
     const [playedCard, setPlayedCard] = React.useState(null);
     // played card position
     const [xposition, setXposition] = React.useState(0);
+    // open model to choose color
+    const [openModal, setOpenModal] = React.useState(false);
 
     const useStyles = makeStyles((theme) => ({
         root: {
@@ -27,24 +31,37 @@ export default function Player(props) {
         card: {
             marginLeft: '-30pt',
         },
+        modal: {
+            color: 'white',
+            textAlign: 'center',
+        },
+        paper: {
+            padding: theme.spacing(2),
+            textAlign: 'center',
+            color: theme.palette.text.secondary,
+            height: '100pt',
+            width: '100pt'
+        },
         cardAnimation: {
             position: 'fixed',
             margin: '0',
-            transform: `translate(${xposition}px, ${ -(window.innerHeight / 2 - 84)}px)`,
+            transform: `translate(${xposition}px, ${-(window.innerHeight / 2 - 85)}px)`,
             transition: 'all 1s'
-        }
+        },
     }));
 
     const classes = useStyles();
     const context = useContext(DeckContext);
     const cardsRefs = useRef([]);
 
-    useEffect(async () => {
+    useEffect(() => {
         if (initialize) initializePlayer();
+        // check special cards played by previous players
+        else if (context.player === id && context.specials.length > 0) readSpecials();
         // if it is the real player
         else if (context.player === id && context.addCard) addCard();
         // reset user's last played card
-        else if (context.player != id && playedCard != null) setPlayedCard(null);
+        else if (context.player !== id && playedCard != null) setPlayedCard(null);
 
     }, [context.addCard, cards.length, context.player])
 
@@ -67,6 +84,17 @@ export default function Player(props) {
             setXposition(getTranslationX(index));
             setPlayedCard(card);
 
+
+            if (["p2", "plus4", "f"].includes(card.number)) {
+                let newSp = context.specials;
+                newSp.push(card.number);
+                context.setSpecials(newSp);
+            }
+
+            if (card.color === "black") {
+                setOpenModal(true);
+            }
+
             setTimeout(() => {
                 context.changeCard(card);
                 cards.splice(index, 1);
@@ -83,7 +111,11 @@ export default function Player(props) {
     const canPlaceCard = (card) => {
         let currCard = context.card;
         return (playedCard != null && playedCard.number === card.number) ||
-            (playedCard == null && (card.color === currCard.color || card.color === "black" || card.number === currCard.number))
+            (playedCard == null && 
+                (card.color === currCard.color || 
+                    card.color === "black"|| 
+                    currCard.color === "black" && card.color === context.specialColor|| 
+                    card.number === currCard.number))
     }
 
     const addCard = () => {
@@ -94,19 +126,74 @@ export default function Player(props) {
         context.setAddCard(false);
     }
 
+    const readSpecials = () => {
+        context.specials.forEach(sp => {
+            switch (sp) {
+                case "4p":
+                    addCard();
+                    addCard();
+                    addCard();
+                    addCard();
+                    break;
+                case "2p":
+                    addCard();
+                    addCard();
+                    break;
+                case "f":
+                    return;
+            }
+        });
+
+        context.setSpecials([]);
+        context.next();
+    }
+
+    const changeColor = (color) => {
+        context.setSpecialColor(color);
+        setOpenModal(false);
+    }
+
     return (
-        <Grid container className={classes.root}>
-            {cards.map((card, index) => {
-                return (
-                    <CardComponent
-                        key={index}
-                        Card={card}
-                        onClick={() => { placeCard(index); }}
-                        className={playedCard == card ? classes.cardAnimation : classes.card}
-                        ref={(el) => cardsRefs.current[index] = el}
-                    />
-                );
-            })}
-        </Grid>
+        <div>
+            <Grid container className={classes.root}>
+                {cards.map((card, index) => {
+                    return (
+                        <CardComponent
+                            key={index}
+                            Card={card}
+                            onClick={() => { placeCard(index); }}
+                            className={playedCard === card ? classes.cardAnimation : classes.card}
+                            ref={(el) => cardsRefs.current[index] = el}
+                        />
+                    );
+                })}
+            </Grid>
+            <Modal
+                open={openModal}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+                className={classes.modal}
+            >
+                <div>
+                    <h1 style={{marginTop: '15%'}}>Choose Color</h1>
+                    <Grid container spacing={3} direction="row" alignItems="center" justify="center">
+                        <Grid item >
+                            <Paper className={classes.paper} style={{backgroundColor: 'red'}} onClick={() => changeColor("red")}></Paper>
+                        </Grid>
+                        <Grid item >
+                            <Paper className={classes.paper} style={{backgroundColor: 'blue'}} onClick={() => changeColor("blue")}></Paper>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={3} direction="row" alignItems="center" justify="center">
+                        <Grid item >
+                            <Paper className={classes.paper} style={{backgroundColor: 'green'}} onClick={() => changeColor("green")}></Paper>
+                        </Grid>
+                        <Grid item >
+                            <Paper className={classes.paper} style={{backgroundColor: 'yellow'}} onClick={() => changeColor("yellow")}></Paper>
+                        </Grid>
+                    </Grid>
+                </div>
+            </Modal>
+        </div>
     );
 }

@@ -52,13 +52,16 @@ export default function Player(props) {
     const context = useContext(DeckContext);
     const cardsRefs = useRef([]);
 
-    useEffect(async () => {
+    useEffect(() => {
         if (initialize) initializePlayer();
         // if it is a Bot
         else if (context.player === id) {
-            // TODO random time
-            await sleep(1000);
-            makeMove();
+            if (context.specials.length > 0) {
+                readSpecials();
+            } else {
+                // TODO random time
+                sleep(1000).then(() => { makeMove(); });
+            }
         }
 
     }, [context.addCard, cards.length, context.player, animation])
@@ -91,6 +94,10 @@ export default function Player(props) {
         setXposition(getTranslationX(index));
         setPlayedCard(card);
 
+        if (["p2", "p4", "f"].includes(card.number)) {
+            context.setSpecials(context.specials.push(card.number));
+        }
+
         setTimeout(() => {
             setAnimation(true);
         }, 100);
@@ -118,16 +125,18 @@ export default function Player(props) {
     const makeMove = () => {
         let possibleMoves = [];
         let currCard = context.card;
+        setPlayedCard(null);
+
         cards.forEach((card, index) => {
             let currMove = [];
 
             // Card with the same color or same number
-            if (card.color === currCard.color || card.number === currCard.number) {
+            if (card.color === currCard.color || card.number === currCard.number || currCard.color === "black" && card.color === context.specialColor) {
                 currMove.push(index);
 
                 // Check for other cards with the same number
                 cards.forEach((card2, index2) => {
-                    if (card2.number === card.number && index != index2) currMove.push(index2)
+                    if (card2.number === card.number && index !== index2) currMove.push(index2)
                 })
             }
             // Card with the same number
@@ -136,25 +145,47 @@ export default function Player(props) {
             }
             // TODO: black card on the table, check that color
 
-            if (currMove.length != 0) possibleMoves.push(currMove);
+            if (currMove.length !== 0) possibleMoves.push(currMove);
         })
 
-        if (possibleMoves.length == 0) {
+        if (possibleMoves.length === 0) {
             addCard();
             makeMove();
         } else {
             // TODO: use longest move
             let index = Math.floor(Math.random() * possibleMoves.length);
-            console.log(possibleMoves[index]);
-            possibleMoves[index].forEach((i) => { placeCard(i); sleep(500) });
+            possibleMoves[index].forEach((i) => { placeCard(i); sleep(200) });
             context.next();
         }
+    }
+
+    const readSpecials = () => {
+        context.specials.forEach(sp => {
+            console.log(sp)
+            switch (sp) {
+                case "plus4":
+                    addCard();
+                    addCard();
+                    addCard();
+                    addCard();
+                    break;
+                case "p2":
+                    addCard();
+                    addCard();
+                    break;
+                case "f":
+                    return;
+            }
+        });
+
+        context.setSpecials([]);
+        context.next();
     }
 
     return (
         <Grid container className={getClass()}>
             {cards.map((card, index) => {
-                if (playedCard == card) {
+                if (playedCard === card) {
                     return (
                         <CardComponent
                             key={index}
