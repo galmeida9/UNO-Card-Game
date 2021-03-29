@@ -8,13 +8,29 @@ export class Card {
     }
 }
 
+export const colors = {
+        BLUE: "blue",
+        RED: "red",
+        GREEN: "green",
+        YELLOW: "yellow",
+        BLACK: "black"
+}
+
+export const specialCards = {
+    PLUS2: "p2",
+    PLUS4: "plus4",
+    FORBIDDEN: "f",
+    INVERT: "t",
+    CHANGE_COLOR: "changecolor"
+}
+
 export function getDeck() {
-    const colors = ["blue", "red", "green", "yellow"];
-    const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "f", "t", "p2"];
-    const specials = ["changecolor", "plus4"];
+    const colorsArray = [colors.BLUE, colors.GREEN, colors.RED, colors.YELLOW];
+    const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", specialCards.FORBIDDEN, specialCards.INVERT, specialCards.PLUS2];
+    const specials = [specialCards.CHANGE_COLOR, specialCards.PLUS4];
 
     var deck = [];
-    colors.forEach(color => {
+    colorsArray.forEach(color => {
         numbers.forEach(num => {
             const card = new Card(color, num, color + num);
             deck.push(card);
@@ -23,7 +39,7 @@ export function getDeck() {
     });
 
     specials.forEach(special => {
-        const card = new Card("black", special, special);
+        const card = new Card(colors.BLACK, special, special);
         deck.push(card);
         deck.push(card);
         deck.push(card);
